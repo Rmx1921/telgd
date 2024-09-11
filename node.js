@@ -31,7 +31,9 @@ async function loadCredentials() {
 }
 
 async function getAuthenticatedClient(credentials) {
-    const { client_secret, client_id, redirect_uris } = credentials.installed;
+    const client_secret = process.env.client_secret
+    const client_id= process.env.client_id
+    const redirect_uris = process.env.redirect_uris
     const oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
 
     try {
