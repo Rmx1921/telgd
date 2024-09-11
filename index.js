@@ -1,3 +1,4 @@
+require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const { google } = require('googleapis');
 const fs = require('fs').promises;
@@ -6,43 +7,27 @@ const http = require('http');
 const url = require('url');
 const destroyer = require('server-destroy');
 const { OAuth2Client } = require('google-auth-library');
-require('dotenv').config();
 
-// Use environment variable for the token
+// Environment variables for Telegram and Google Drive
 const token = process.env.TELEGRAM_BOT_TOKEN;
-
-// Scopes for Google Drive API
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
-
-// Token path
 const TOKEN_PATH = 'token.json';
 
 // Create a bot instance
 const bot = new TelegramBot(token, { polling: true });
 
-async function loadCredentials() {
-    try {
-        const content = await fs.readFile('credentials.json');
-        return JSON.parse(content);
-    } catch (err) {
-        console.error('Error loading client secret file:', err);
-        throw err;
-    }
-}
+async function getAuthenticatedClient() {
+    const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+    const client_id = process.env.GOOGLE_CLIENT_ID;
+    const redirect_uris = [process.env.GOOGLE_REDIRECT_URI]; // Ensure it's an array
 
-async function getAuthenticatedClient(credentials) {
-    const client_secret = process.env.client_secret
-    const client_id= process.env.client_id
-    const redirect_uris = process.env.redirect_uris
     const oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
 
     try {
-        // Check if we have previously stored a token.
         const token = await fs.readFile(TOKEN_PATH);
         oAuth2Client.setCredentials(JSON.parse(token));
         return oAuth2Client;
     } catch (error) {
-        // If there's no token, get a new one
         const authorizeUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
@@ -63,7 +48,6 @@ async function getAuthenticatedClient(credentials) {
         }).listen(3000, async () => {
             console.log(`Open this URL in your browser to authenticate: ${authorizeUrl}`);
 
-            // Dynamically import the `open` module (since it is an ESM module)
             const open = await import('open');
             open.default(authorizeUrl, { wait: false }).then(cp => cp.unref());
         });
@@ -73,8 +57,7 @@ async function getAuthenticatedClient(credentials) {
 
 async function main() {
     try {
-        const credentials = await loadCredentials();
-        const auth = await getAuthenticatedClient(credentials);
+        const auth = await getAuthenticatedClient();
         const drive = google.drive({ version: 'v3', auth });
 
         console.log('Authentication successful.');

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "google-auth-library": "^9.14.1",
     "googleapis": "^144.0.0",
     "node-telegram-bot-api": "^0.66.0",
+    "nodemon": "^3.1.4",
     "open": "^10.1.0",
     "server-destroy": "^1.0.1"
   }
